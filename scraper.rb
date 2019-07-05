@@ -39,13 +39,16 @@ form['dateFrom'] = dateFrom
 form['dateTo']   = dateTo
 page = form.submit()
 
-(0..page.search('.non_table_headers').size - 1).each do |i|
-  date_received = Date.strptime(page.search('.non_table_headers ~ div')[i].at('span:contains("Date Lodged") ~ span').inner_text, '%d/%m/%Y').to_s rescue nil
+headings = page.at('.bodypanel ~ div').search('h2')
+(0..headings.size - 1).each do |i|
+  heading = headings[i]
+  d = heading.next_sibling
+  date_received = Date.strptime(d.at('span:contains("Date Lodged") ~ span').inner_text, '%d/%m/%Y').to_s rescue nil
 
   record = {
-    'council_reference' => page.search('.non_table_headers ~ div')[i].at('span:contains("Application No.") ~ span').inner_text,
-    'address' => page.search('.non_table_headers')[i].inner_text,
-    'description' => page.search('.non_table_headers ~ div')[i].at('span:contains("Type of Work") ~ span').inner_text,
+    'council_reference' => d.at('span:contains("Application No.") ~ span').inner_text,
+    'address' => heading.inner_text,
+    'description' => d.at('span:contains("Type of Work") ~ span').inner_text,
     'info_url' => info_url,
     'comment_url' => comment_url,
     'date_scraped' => Date.today.to_s,
